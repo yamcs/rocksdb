@@ -17,9 +17,9 @@ class GapSegment : public ValueSegment {
   static const uint8_t SUBFORMAT_ID_DELTAZG_VB = 2;
 
   GapSegment(const Slice &slice, size_t &pos);
-  void WriteTo(std::string &slice);
-  void MergeFrom(const rocksdb::Slice &slice, size_t &pos);
-  size_t MaxSerializedSize() { return 9 + 4 * values.size(); }
+  void WriteTo(std::string &slice) override;
+  void MergeFrom(const rocksdb::Slice &slice, size_t &pos) override;
+  size_t MaxSerializedSize() override { return 9 + 4 * values.size(); }
   size_t PeekNumValues(const rocksdb::Slice &slice, size_t pos) override;
   void Reserve(size_t n) override { values.reserve(n); }
 

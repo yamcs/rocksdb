@@ -16,9 +16,9 @@ public:
 
     DoubleValueSegment(const Slice &slice, size_t &pos);
     
-    void WriteTo(std::string& slice);
-    void MergeFrom(const rocksdb::Slice& slice, size_t& pos);
-    size_t MaxSerializedSize() {
+    void WriteTo(std::string& slice) override;
+    void MergeFrom(const rocksdb::Slice& slice, size_t& pos) override;
+    size_t MaxSerializedSize() override {
          return 4 + 8 * values.size();
     }
     size_t PeekNumValues(const rocksdb::Slice &slice, size_t pos) override;

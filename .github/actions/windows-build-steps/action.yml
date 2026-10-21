@@ -21,7 +21,6 @@ runs:
       CMAKE_HOME: C:/Program Files/CMake
       CMAKE_BIN: C:/Program Files/CMake/bin/cmake.exe
       CTEST_BIN: C:/Program Files/CMake/bin/ctest.exe
-      JAVA_HOME: C:/Program Files/BellSoft/LibericaJDK-8
       SNAPPY_HOME: ${{ github.workspace }}/vcpkg/installed/x64-windows-static
       SNAPPY_INCLUDE: ${{ github.workspace }}/vcpkg/installed/x64-windows-static/include
       SNAPPY_LIB_RELEASE: ${{ github.workspace }}/vcpkg/installed/x64-windows-static/lib/snappy.lib
@@ -34,9 +33,7 @@ runs:
     run: |-
       # NOTE: if ... Exit $LASTEXITCODE lines needed to exit and report failure
       echo "===================== Install Dependencies ====================="      
-      echo "==========  Installing JDK..."
-      choco install liberica8jdk -y
-      if(!$?) { Exit $LASTEXITCODE }
+      # the JDK (JAVA_HOME) is installed by actions/setup-java in the workflow
       mkdir $Env:THIRDPARTY_HOME
       cd $Env:THIRDPARTY_HOME
       
@@ -45,7 +42,8 @@ runs:
       $env:Path = $env:JAVA_HOME + ";" + $env:Path
       mkdir build
       cd build
-      & cmake -G "$Env:CMAKE_GENERATOR" -DCMAKE_BUILD_TYPE=Release -DROCKSDB_BUILD_SHARED=0 -DOPTDBG=0 -DSNAPPY=1 -DLZ4=1 -DZSTD=1 -DJNI=1 -DWITH_MD_LIBRARY=OFF ..
+      # PORTABLE=1: baseline x64 instead of the default /arch:AVX2, for compatibility with older CPUs
+      & cmake -G "$Env:CMAKE_GENERATOR" -DCMAKE_BUILD_TYPE=Release -DPORTABLE=1 -DROCKSDB_BUILD_SHARED=0 -DOPTDBG=0 -DSNAPPY=1 -DLZ4=1 -DZSTD=1 -DJNI=1 -DWITH_MD_LIBRARY=OFF ..
       if(!$?) { Exit $LASTEXITCODE }
       cd ..
       echo "Building with VS version: $Env:CMAKE_GENERATOR"
