@@ -21,6 +21,8 @@ public:
     size_t MaxSerializedSize() {
          return 4 + 8 * values.size();
     }
+    size_t PeekNumValues(const rocksdb::Slice &slice, size_t pos) override;
+    void Reserve(size_t n) override { values.reserve(n); }
 
 private:
     void parseRaw(const rocksdb::Slice& slice, int n);

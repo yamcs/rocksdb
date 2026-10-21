@@ -73,7 +73,7 @@ inline void float_compress(const std::vector<float>& fa, std::string& buffer) {
 /// return will not not ok and the position will be undefined.
 rocksdb::Status float_decompress(const rocksdb::Slice& slice, size_t& pos,
                                  const size_t n, std::vector<float>& out) {
-  out.reserve(out.size() + n);
+  reserve_for_append(out, n);
   BitReader br((const unsigned char*)(slice.data() + pos),
                slice.size() - pos);  // Initialize BitReader with slice and pos
   int xorValue;

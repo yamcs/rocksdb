@@ -239,7 +239,7 @@ static Status parse_values(const rocksdb::Slice& slice, size_t& pos,
     return status;
   }
 
-  values.reserve(count);
+  reserve_for_append(values, count);
   for (size_t i = 0; i < count; i++) {
     uint32_t str_len;
 

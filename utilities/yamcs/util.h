@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -10,6 +11,18 @@
 
 namespace ROCKSDB_NAMESPACE {
 namespace yamcs {
+
+// Reserves room for appending n elements to v. Unlike v.reserve(v.size() + n),
+// the capacity grows geometrically, so repeatedly appending (e.g. when merging
+// many operands into one segment) stays linear instead of reallocating and
+// copying the whole vector on each append.
+template <typename T>
+inline void reserve_for_append(std::vector<T>& v, size_t n) {
+  size_t required = v.size() + n;
+  if (required > v.capacity()) {
+    v.reserve(std::max(required, 2 * v.capacity()));
+  }
+}
 
 
 inline int32_t decodeZigZag(uint32_t x) {
@@ -64,7 +77,7 @@ inline std::vector<uint32_t> encodeDeltaDeltaZigZag(
 inline void decodeDeltaDeltaZigZag(const std::vector<uint32_t>& ddz,
                                    std::vector<int32_t>& out) {
   size_t n = ddz.size();
-  out.reserve(out.size() + n);
+  reserve_for_append(out, n);
 
   int32_t first = decodeZigZag(ddz[0]);
   out.push_back(first);
@@ -107,6 +120,15 @@ inline rocksdb::Status read_var_u32(const rocksdb::Slice& slice, size_t& pos,
     shift += 7;
   }
   return Status::Corruption("Invalid VarInt32");
+}
+
+// Returns the number of values of a serialized int, long, float or double
+// segment without decoding it: the header byte at pos is followed by the
+// number of values as a var_u32. Returns 0 if it cannot be read.
+inline size_t peek_num_values(const rocksdb::Slice& slice, size_t pos) {
+  pos++;  // header byte
+  uint32_t n;
+  return read_var_u32(slice, pos, n).ok() ? n : 0;
 }
 
 inline rocksdb::Status read_var_u64(const rocksdb::Slice& slice, size_t& pos,

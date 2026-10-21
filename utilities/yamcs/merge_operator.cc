@@ -121,6 +121,17 @@ bool YamcsParchiveMergeOperator::MergeSlices(const Slice& key,
       return false;
     }
 
+    // allocate the values of the merged segment at once, if all the segment
+    // sizes can be read from their headers
+    size_t total = segment->PeekNumValues(first_value, 1);
+    for (auto it = begin; it != end && total > 0; ++it) {
+      size_t n = segment->PeekNumValues(*it, 1);
+      total = n > 0 ? total + n : 0;
+    }
+    if (total > 0 && total <= INT32_MAX) {
+      segment->Reserve(total);
+    }
+
     for (auto it = begin; it != end; ++it) {
       size_t pos1 = 1;
       segment->MergeFrom(*it, pos1);

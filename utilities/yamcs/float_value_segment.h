@@ -21,6 +21,8 @@ class FloatValueSegment : public ValueSegment {
   void WriteTo(std::string& slice);
   void MergeFrom(const rocksdb::Slice& slice, size_t& pos);
   size_t MaxSerializedSize() { return 5 + 4 * values.size() + 1; }
+  size_t PeekNumValues(const rocksdb::Slice &slice, size_t pos) override;
+  void Reserve(size_t n) override { values.reserve(n); }
 
  private:
   void parseRaw(const rocksdb::Slice& slice, int n);

@@ -27,6 +27,17 @@ void GapSegment::WriteTo(std::string &buf) {
   }
 }
 
+// the gap segment starts with the interval index and the subformat id, then the
+// compressed vector which starts with the number of values
+size_t GapSegment::PeekNumValues(const rocksdb::Slice &slice, size_t pos) {
+  uint32_t intervalIdx, n;
+  if (!read_var_u32(slice, pos, intervalIdx).ok()) {
+    return 0;
+  }
+  pos++;  // subformat id
+  return read_var_u32(slice, pos, n).ok() ? n : 0;
+}
+
 void GapSegment::MergeFrom(const rocksdb::Slice &slice, size_t &pos) {
   uint32_t intervalIdx;
   status = read_var_u32(slice, pos, intervalIdx);

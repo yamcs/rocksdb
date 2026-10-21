@@ -47,10 +47,14 @@ void DoubleValueSegment::MergeFrom(const rocksdb::Slice& slice, size_t& pos) {
     return;
   }
 
-  values.reserve(values.size() + n);
+  reserve_for_append(values, n);
   for (size_t i = 0; i < n; i++) {
     values.push_back(read_f64_be_unchecked(slice, pos));
   }
+}
+
+size_t DoubleValueSegment::PeekNumValues(const rocksdb::Slice &slice, size_t pos) {
+  return peek_num_values(slice, pos);
 }
 
 }  // namespace yamcs

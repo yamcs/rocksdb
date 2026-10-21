@@ -20,6 +20,8 @@ class GapSegment : public ValueSegment {
   void WriteTo(std::string &slice);
   void MergeFrom(const rocksdb::Slice &slice, size_t &pos);
   size_t MaxSerializedSize() { return 9 + 4 * values.size(); }
+  size_t PeekNumValues(const rocksdb::Slice &slice, size_t pos) override;
+  void Reserve(size_t n) override { values.reserve(n); }
 
  private:
   std::vector<int32_t> values;
